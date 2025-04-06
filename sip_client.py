@@ -9,8 +9,10 @@ Task to do:
 '''
 import socket
 import uuid
+import threading
 from network_util import send_udp_packet, receive_udp_packet, create_udp_socket
 from config import *
+from rtp_stream import *
 
 def generate_sip_invite(to, from_, call_id, sdp):
     """
@@ -116,25 +118,38 @@ def sip_client(to, from_, call_id):
     print(f"Generated Call-ID: {call_id}")
 
     # Create a UDP socket
-    sock = create_udp_socket()
+    sock = create_udp_socket(SIP_PORT)
 
     # Generate SDP body
     sdp = generate_sdp_body()
 
     # Generate SIP INVITE message
-    sip_invite = generate_sip_invite(to, from_, call_id, sdp)
-    send_udp_packet(to, SIP_PORT, sip_invite)
+    sip_invite = generate_sip_invite(to, from_, call_id, sdp).encode('utf-8')
+    send_udp_packet(to, SIP_PORT, sip_invite, sock)
 
     # Wait for SIP response
     addr, response = receive_udp_packet(sock, BUFFER_SIZE)
     print(f"Received response: {response}")
 
+    response_str = response.decode('utf-8')
+
     # Check for SIP response status
-    if "200 OK" in response:
+    if "200 OK" in response_str:
         print("Call established successfully.")
         ack_message = generate_sip_ack(call_id, to, from_)
         send_udp_packet(sock, ack_message, (to, SIP_PORT))
-    elif response.split()[1].startswith(('4', '5')):
+
+        # Start RTP streaming in a separate thread
+        threading.Thread(target=send_rtp_stream, args=("audio.wav", RTP_PORT)).start()
+
+        # Wait for streaming to finish
+        threading.Event().wait(30)
+
+        # Generate SIP BYE message
+        bye_message = generate_sip_bye(call_id, to, from_)
+        send_udp_packet(sock, SIP_PORT, bye_message, (to, SIP_PORT))
+
+    elif response_str.split()[1].startswith(('4', '5')):
         print(f"Error: {response}")
         log_sip_message(response)
 

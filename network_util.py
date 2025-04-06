@@ -11,37 +11,23 @@ Task to do: DONE
 import socket
 from config import *
 
-def send_udp_packet(ip, port, data):
-    """
-    Sends data over UDP to the specified IP and port.
-    
-    Args:
-        ip (str): The destination IP address.
-        port (int): The destination port number.
-        data (bytes): The data to be sent.
-    """
+def send_udp_packet(ip, port, data, sock=None):
+ 
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            if isinstance(data, str):
-                data = data.encode('utf-8')
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+
+        if sock is None:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as temp_sock:
+                temp_sock.sendto(data, (ip, port))
+        else:
             sock.sendto(data, (ip, port))
-            print(f"Sent {len(data)} bytes to {ip}:{port}")
+
+        print(f"Sent {len(data)} bytes to {ip}:{port}")
     except Exception as e:
         print(f"Error sending UDP packet: {e}")
 
 def receive_udp_packet(sock, buffer_size = BUFFER_SIZE, timeout = None):
-    """
-    Receives data from a UDP socket with the specified buffer size. 
-    Ensure it can handle multiple incoming messages correctly.
-
-    Args:
-        sock (socket.socket): The UDP socket to receive data from.
-        buffer_size (int): The size of the buffer for receiving data.
-        timeout (float): The timeout for the socket in seconds. If None, no timeout is set.
-    
-    Returns:
-        tuple: The address of the sender and the received data.
-    """
     try:
         if timeout:
             sock.settimeout(timeout)
@@ -56,15 +42,7 @@ def receive_udp_packet(sock, buffer_size = BUFFER_SIZE, timeout = None):
         return None
 
 def create_udp_socket(port):
-    """
-    Creates a UDP socket bound to the specified port.
     
-    Args:
-        port (int): The port number to bind the socket to.
-    
-    Returns:
-        socket.socket: The created UDP socket.
-    """
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('', port))
