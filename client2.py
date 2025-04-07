@@ -37,21 +37,21 @@ try:
         sip_sock.close()
         rtp_sock.close()
         exit(1)
+    
+    # Decode the SIP message
+    decoded_data = data.decode(errors="ignore")
+
+    # Extract Call-ID using regex
+    call_id_match = re.search(r"Call-ID:\s*(\S+)", decoded_data)
+    if call_id_match:
+        call_id = call_id_match.group(1)
+        print("Extracted Call-ID:", call_id)
+    else:
+        print("Call-ID not found")
 
     if b"INVITE" in data:
         sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # id, to, from_
         print("Sent 200 OK")
-
-        # Decode the SIP message
-        decoded_data = data.decode(errors="ignore")
-
-        # Extract Call-ID using regex
-        call_id_match = re.search(r"Call-ID:\s*(\S+)", decoded_data)
-        if call_id_match:
-            call_id = call_id_match.group(1)
-            print("Extracted Call-ID:", call_id)
-        else:
-            print("Call-ID not found")
 
         # Wait for ACK
         data, _ = sip_sock.recvfrom(1024)
@@ -87,6 +87,7 @@ try:
                             sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # send okay instead of ack
                             print("Sent 200 OK")
                             # sip_sock.sendto(build_ack(call_id, "caller", "callee").encode(), addr) # call_id, to, from_
+                            raise SystemExit
                         else:
                             print("Received SIP message:", data.decode(errors="ignore"))
 
