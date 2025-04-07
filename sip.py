@@ -30,33 +30,6 @@ def build_ok(call_id, to_user, from_user):
         "\r\n"
     )
 
-# delete if the new generator works
-def generate_sdp_body_before():
-    """
-    Generate an SDP body for the INVITE message.
-    """
-    return f"v=0\r\n" \
-           f"o=- 0 0 IN IP4 {LOCAL_IP}\r\n" \
-           f"s=Session\r\n" \
-           f"c=IN IP4 {LOCAL_IP}\r\n" \
-           f"t=0 0\r\n" \
-           f"a=tool:libavformat 58.29.100\r\n" \
-           f"a=recvonly\r\n" \
-           f"m=audio {RTP_PORT} RTP/AVP {AUDIO_CODEC}\r\n" \
-           f"a=rtpmap:{AUDIO_CODEC} PCMU/8000\r\n"
-
-# remove after testing main generator
-def generate_sdp_body_2():
-    return (
-        "v=0\r\n"
-        "o=- 0 0 IN IP4 127.0.0.1\r\n"
-        "s=Audio Session\r\n"
-        "c=IN IP4 127.0.0.1\r\n"
-        "t=0 0\r\n"
-        "m=audio 8000 RTP/AVP 0\r\n"
-        "a=rtpmap:0 PCMU/8000/1\r\n"  # PCMU codec, 8kHz, mono
-    )
-
 def generate_sdp_body():
     """
     Generate an SDP body for the INVITE message.
