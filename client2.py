@@ -6,7 +6,7 @@ from rtp import parse_rtp_packet
 from audio_utils import play_audio_stream
 from config import *
 
-# Validate the audio format of the RTP payload
+# specs of .wav file
 EXPECTED_SAMPLE_RATE = 8000  # 8 kHz
 EXPECTED_CHANNELS = 1        # Mono
 EXPECTED_BIT_DEPTH = 16      # 16-bit PCM

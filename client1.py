@@ -47,7 +47,7 @@ try:
         rtp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         seq = 0
         timestamp = 0
-
+        
         for frame in read_audio_frames(file_name):  # Supports MP3, WAV, etc.
             pkt = build_rtp_packet(frame, sequence_number=seq, timestamp=timestamp)
             rtp_sock.sendto(pkt, (receiver_ip, receiver_rtp_port))
