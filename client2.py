@@ -39,7 +39,7 @@ try:
         exit(1)
 
     if b"INVITE" in data:
-        sip_sock.sendto(build_ok().encode(), addr)
+        sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # id, to, from_
         print("Sent 200 OK")
 
         # Decode the SIP message
