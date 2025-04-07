@@ -1,6 +1,6 @@
 setup
 
-pre-requisite: use python 3.10.11
+hard requirement: use python 3.10.11
 
 1. pip install pyaudio
 2. pip install pydub
