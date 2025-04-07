@@ -1,5 +1,5 @@
 import socket
-from sip import build_ok, build_ack
+from sip import *
 from rtp import parse_rtp_packet
 from audio_utils import play_audio_stream
 from config import *
@@ -65,9 +65,12 @@ try:
                         break
 
                     # Check for BYE message during RTP session
+                    # change build_ack to build_ack_bye for bye acknowledgment
                     if b"BYE" in data:
                         print("Received BYE, ending call")
-                        sip_sock.sendto(build_ack().encode(), addr)
+                        ack_msg = build_ack_bye()  # Build the ACK message
+                        sip_sock.sendto(ack_msg.encode(), addr)  # Send ACK back to Client 1
+                        print("Sent ACK for BYE")
                         break
 
                     try:
