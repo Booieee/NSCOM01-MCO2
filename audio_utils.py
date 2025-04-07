@@ -60,7 +60,6 @@ def play_audio_stream(sample_rate=8000, channels=1, bit_depth=16):
     Returns:
         stream: An audio playback stream.
     """
-    import pyaudio
     audio = pyaudio.PyAudio()
     stream = audio.open(
         format=pyaudio.paInt16 if bit_depth == 16 else pyaudio.paInt8,

@@ -59,14 +59,23 @@ try:
 
         # Send BYE after streaming
         bye_msg = build_ack_bye(call_id, "callee", "caller")
-        sip_sock.sendto(bye_msg.encode(), (receiver_ip, receiver_sip_port))
-        print("Sent BYE")
-        try:
-            data, _ = sip_sock.recvfrom(1024)
-            if b"ACK" in data:
-                print("Received ACK for BYE, call terminated.")
-        except socket.timeout:
-            print("No ACK for BYE, terminating anyway.")
+        max_retries = 3  # Retry sending BYE up to 3 times
+        ack_received = False
+
+        for attempt in range(max_retries):
+            sip_sock.sendto(bye_msg.encode(), (receiver_ip, receiver_sip_port))
+            print(f"Sent BYE (Attempt {attempt + 1})")
+            try:
+                data, _ = sip_sock.recvfrom(1024)
+                if b"ACK" in data:
+                    print("Received ACK for BYE, call terminated.")
+                    ack_received = True
+                    break
+            except socket.timeout:
+                print(f"No ACK for BYE, retrying... ({attempt + 1}/{max_retries})")
+
+        if not ack_received:
+            print("No ACK for BYE after retries, terminating anyway.")
     else:
         print("Did not receive 200 OK, call failed.")
 except socket.timeout:
