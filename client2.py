@@ -1,6 +1,7 @@
 import socket
 import select
-from sip import build_ok, build_ack
+import re
+from sip import *
 from rtp import parse_rtp_packet
 from audio_utils import play_audio_stream
 from config import *
@@ -41,10 +42,23 @@ try:
         sip_sock.sendto(build_ok().encode(), addr)
         print("Sent 200 OK")
 
+        # Decode the SIP message
+        decoded_data = data.decode(errors="ignore")
+
+        # Extract Call-ID using regex
+        call_id_match = re.search(r"Call-ID:\s*(\S+)", decoded_data)
+        if call_id_match:
+            call_id = call_id_match.group(1)
+            print("Extracted Call-ID:", call_id)
+        else:
+            print("Call-ID not found")
+
         # Wait for ACK
         data, _ = sip_sock.recvfrom(1024)
         if b"ACK" in data:
             print("Received ACK, starting RTP session")
+
+            print(data.decode(errors="ignore")) # delete after testing
 
             # Validate audio format (adjust these values based on your RTP payload format)
             try:
@@ -60,7 +74,6 @@ try:
             frame_count = 0
             sockets = [rtp_sock, sip_sock]
 
-
             while True:
                 readable, _, _ = select.select(sockets, [], [])
 
@@ -69,14 +82,11 @@ try:
 
                     if sock == sip_sock:
                         if b"BYE" in data:
-
-                            # Extract necessary values for build_ack()
-                            call_id = "12345"  # Replace with the actual Call-ID from the SIP message
-                            to = "user2@example.com"  # Replace with the actual 'To' header value
-                            from_ = "sip:user1@example.com"  # Replace with the actual 'From' header value
-
+                            # from ack to ok
                             print("Received BYE, ending call")
-                            sip_sock.sendto(build_ack(call_id, to, from_).encode(), addr)
+                            sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # send okay instead of ack
+                            print("Sent 200 OK")
+                            # sip_sock.sendto(build_ack(call_id, "caller", "callee").encode(), addr) # call_id, to, from_
                         else:
                             print("Received SIP message:", data.decode(errors="ignore"))
 

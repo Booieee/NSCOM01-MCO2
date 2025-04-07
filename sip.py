@@ -1,6 +1,6 @@
-import socket
-import uuid
-import threading
+# import socket
+# import uuid
+# import threading
 from config import *
 
 def build_invite(to, from_, call_id, sdp):
@@ -18,8 +18,17 @@ def build_invite(to, from_, call_id, sdp):
            f"Content-Length: {len(sdp)}\r\n\r\n" \
            f"{sdp}"
 
-def build_ok():
-    return "SIP/2.0 200 OK\r\n\r\n"
+def build_ok(call_id, to_user, from_user):
+    return (
+        "SIP/2.0 200 OK\r\n"
+        f"Via: SIP/2.0/UDP 127.0.0.1:5060\r\n"
+        f"From: <sip:{from_user}@127.0.0.1>\r\n"
+        f"To: <sip:{to_user}@127.0.0.1>\r\n"
+        f"Call-ID: {call_id}\r\n"
+        "CSeq: 1 BYE\r\n"
+        "Content-Length: 0\r\n"
+        "\r\n"
+    )
 
 # delete if the new generator works
 def generate_sdp_body_before():

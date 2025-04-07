@@ -58,13 +58,13 @@ try:
             timestamp += 160
 
         # Send BYE after streaming
-        bye_msg = build_ack_bye(call_id, "callee", "caller")
+        bye_msg = build_ack_bye(call_id, "callee", "caller") # call_id, to, from_ 
         sip_sock.sendto(bye_msg.encode(), (receiver_ip, receiver_sip_port))
         print("Sent BYE")
         try:
             data, _ = sip_sock.recvfrom(1024)
-            if b"ACK" in data:
-                print("Received ACK for BYE, call terminated.")
+            if b"200 OK" in data:
+                print("Received 200 OK, call terminated.")
         except socket.timeout:
             print("No ACK for BYE, terminating anyway.")
     else:
