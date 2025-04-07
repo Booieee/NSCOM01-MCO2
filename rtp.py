@@ -1,6 +1,7 @@
 import struct
 import wave
 from pydub import AudioSegment
+import pyaudio 
 
 def build_rtp_packet(payload, sequence_number=0, timestamp=0, ssrc=1234):
     header = struct.pack("!BBHII", 0x80, 0x00, sequence_number, timestamp, ssrc)

@@ -1,7 +1,6 @@
 import socket
 import uuid
 import threading
-from network_util import send_udp_packet, receive_udp_packet, create_udp_socket
 from config import *
 
 def build_invite(to, from_, call_id, sdp):

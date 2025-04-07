@@ -3,7 +3,7 @@ import socket
 import time
 import uuid
 from sip import build_invite, build_ack, build_ack_bye, generate_sdp_body
-from rtp_util import build_rtp_packet, read_audio_frames  # Assuming you have this
+from rtp import *  # Assuming you have this
 from config import * #specify rtp port in config.py
 
 # check current directory for debugging

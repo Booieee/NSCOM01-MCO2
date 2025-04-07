@@ -25,7 +25,7 @@ rtp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 rtp_sock.bind((LOCAL_IP, RTP_PORT))
 
 try:
-    sip_sock.settimeout(5)  # Set a 5-second timeout for SIP responses
+    # sip_sock.settimeout(5)  # uncomment after testing
     # Handle SIP INVITE
     try:
         data, addr = sip_sock.recvfrom(1024)
