@@ -5,6 +5,7 @@ import uuid
 from sip import build_invite, build_ack, build_ack_bye, generate_sdp_body
 from rtp import *  # Assuming you have this
 from config import * #specify rtp port in config.py
+from rtcp import build_rtcp_sender_report
 
 # check current directory for debugging
 print("Current directory: ", os.getcwd()) # remove after testing
@@ -45,12 +46,29 @@ try:
 
         # Start RTP streaming
         rtp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        rtcp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Add RTCP socket
+
+        print("data: ", data.decode(errors="ignore")) # delete after testing
+        # to do: extract ssrc from the data
+
+
         seq = 0
         timestamp = 0
-        
+        ssrc = 1234  
+        packet_count = 0
+        octet_count = 0
+
         for frame in read_audio_frames(file_name):  # Supports MP3, WAV, etc.
             pkt = build_rtp_packet(frame, sequence_number=seq, timestamp=timestamp)
             rtp_sock.sendto(pkt, (receiver_ip, receiver_rtp_port))
+
+            # Update RTCP statistics
+            packet_count += 1
+            octet_count += len(frame)
+            
+            if seq % (5 / 0.02) == 0:  # Assuming 50 RTP packets per second
+                rtcp_sr = build_rtcp_sender_report(ssrc, timestamp, packet_count, octet_count)
+                rtcp_sock.sendto(rtcp_sr, (receiver_ip, receiver_rtp_port + 1))  # RTCP port is typically RTP port + 1
 
             print(f"Sent frame #{seq}, Timestamp: {timestamp}, Size: {len(frame)} bytes")
             time.sleep(0.02)  # Simulate real-time
