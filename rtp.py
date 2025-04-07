@@ -81,7 +81,7 @@ def read_audio_frames_before(file_path, frame_size=320):
                 break
             yield frame
 
-def read_audio_frames(file_path, frame_size=320):
+def read_audio_frames(file_path, frame_size=520):
     """
     Reads audio frames from a file (supports WAV and other formats).
 
@@ -92,20 +92,15 @@ def read_audio_frames(file_path, frame_size=320):
     Yields:
         bytes: A single audio frame.
     """
-    if file_path.endswith('.wav'):
-        # Handle WAV files
-        with wave.open(file_path, 'rb') as wav_file:
-            if wav_file.getnchannels() != 1 or wav_file.getsampwidth() != 2 or wav_file.getframerate() != 8000:
-                raise ValueError("Unsupported WAV format. Expected 8 kHz, mono, 16-bit PCM.")
-            while True:
-                frame = wav_file.readframes(frame_size // 2)  # Divide by 2 because 16-bit audio = 2 bytes per sample
-                if not frame:
-                    break
-                yield frame
-    else:
-        # Handle other formats (e.g., MP3, AAC)
+    try:
+        print(f"Converting '{file_path}' to 8kHz mono 16-bit PCM using pydub...")
         audio = AudioSegment.from_file(file_path)
-        audio = audio.set_frame_rate(8000).set_channels(1).set_sample_width(2)  # Convert to 8kHz, mono, 16-bit PCM
+        audio = audio.set_frame_rate(8000).set_channels(1).set_sample_width(2)
         raw_data = audio.raw_data
+
         for i in range(0, len(raw_data), frame_size):
             yield raw_data[i:i + frame_size]
+
+    except Exception as e:
+        print(f"Error processing {file_path}: {e}")
+        raise
