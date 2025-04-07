@@ -27,8 +27,7 @@ rtp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 rtp_sock.bind((LOCAL_IP, RTP_PORT))
 
 try:
-    # sip_sock.settimeout(5)  # uncomment after testing
-    # Handle SIP INVITE
+
     try:
         data, addr = sip_sock.recvfrom(1024)
         print("Received SIP message:", data.decode())
@@ -50,7 +49,7 @@ try:
         print("Call-ID not found")
 
     if b"INVITE" in data:
-        sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # id, to, from_
+        sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr)
         print("Sent 200 OK")
 
         # Wait for ACK
@@ -60,7 +59,7 @@ try:
 
             print(data.decode(errors="ignore")) # delete after testing
 
-            # Validate audio format (adjust these values based on your RTP payload format)
+            # Validate audio format
             try:
                 validate_audio_format(sample_rate=8000, channels=1, bit_depth=16)
             except ValueError as e:
@@ -74,6 +73,9 @@ try:
             frame_count = 0
             sockets = [rtp_sock, sip_sock]
 
+            # Flag to indicate if BYE was received
+            bye_received = False  # under testing
+
             while True:
                 readable, _, _ = select.select(sockets, [], [])
 
@@ -82,12 +84,10 @@ try:
 
                     if sock == sip_sock:
                         if b"BYE" in data:
-                            # from ack to ok
-                            print("Received BYE, ending call")
-                            sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr) # send okay instead of ack
+                            print("Received BYE, ending call after processing remaining frames.")
+                            sip_sock.sendto(build_ok(call_id, "caller", "callee").encode(), addr)
                             print("Sent 200 OK")
-                            # sip_sock.sendto(build_ack(call_id, "caller", "callee").encode(), addr) # call_id, to, from_
-                            raise SystemExit
+                            bye_received = True  # Set the flag
                         else:
                             print("Received SIP message:", data.decode(errors="ignore"))
 
@@ -102,11 +102,19 @@ try:
                             frame_count += 1
                         except Exception as e:
                             print(f"Error parsing RTP packet: {e}")
+
+                # Exit the loop if BYE was received and no more RTP frames are pending
+                if bye_received:
+                    # Check if there are no more RTP frames to process
+                    readable, _, _ = select.select([rtp_sock], [], [], 0.5)  # Timeout to ensure no pending frames
+                    if not readable:
+                        print("No more RTP frames pending. Exiting.")
+                        raise SystemExit  # Exit the loop if no more RTP frames are pendings
 except Exception as e:
     print("Error:", e)
 finally:
     sip_sock.close()
     rtp_sock.close()
     if 'stream' in locals():
-        stream.close()  # Ensure the audio stream is closed
+        stream.close() 
     print("Sockets and audio stream closed.")

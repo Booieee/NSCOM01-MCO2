@@ -20,5 +20,3 @@ def build_rtcp_sender_report(ssrc, rtp_timestamp, packet_count, octet_count):
     sender_info = struct.pack('!IIIIII', ssrc, ntp_timestamp, ntp_frac, rtp_timestamp, packet_count, octet_count)
 
     return rtcp_header + sender_info
-
-# this function is still under testing

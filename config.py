@@ -1,8 +1,8 @@
-LOCAL_IP = "127.0.0.1"  # or your LAN IP
-SIP_PORT = 5060         # default or any valid SIP ports
-RTP_PORT = 5004        # default or any valid RTP ports // ANY EVEN NUMBER PORTS
+LOCAL_IP = "127.0.0.1"  
+SIP_PORT = 5060         
+RTP_PORT = 5004        
 RTP_VERSION = 2
-PAYLOAD_TYPE = 0  # PCMU
-SSRC = 12345 # Synchronization source identifier
-AUDIO_CODEC = "PCMU"  # G.711 codec
-BUFFER_SIZE = 1024  # Buffer size for SIP
+PAYLOAD_TYPE = 0  
+SSRC = 12345 
+AUDIO_CODEC = "PCMU"  
+BUFFER_SIZE = 1024 

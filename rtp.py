@@ -7,12 +7,6 @@ def build_rtp_packet(payload, sequence_number=0, timestamp=0, ssrc=1234):
     header = struct.pack("!BBHII", 0x80, 0x00, sequence_number, timestamp, ssrc)
     return header + payload
 
-# delete if the new parser works
-def parse_rtp_packet_before(packet):
-    header = packet[:12]
-    payload = packet[12:]
-    return payload
-
 def parse_rtp_packet(packet):
     """
     Parses an RTP packet and extracts the header fields and payload.
@@ -54,32 +48,6 @@ def parse_rtp_packet(packet):
         "timestamp": timestamp,
         "ssrc": ssrc,
     }, payload
-
-def read_audio_frames_before(file_path, frame_size=320):
-    """
-    Reads audio frames from a WAV file.
-
-    Args:
-        file_path (str): Path to the audio file.
-        frame_size (int): Number of bytes per frame (default is 320 for 20ms at 8kHz).
-
-    Yields:
-        bytes: A single audio frame.
-    """
-    with wave.open(file_path, 'rb') as wav_file:
-        # Ensure the WAV file is in the correct format
-        if wav_file.getnchannels() != 1:
-            raise ValueError("Only mono audio is supported.")
-        if wav_file.getsampwidth() != 2:
-            raise ValueError("Only 16-bit audio is supported.")
-        if wav_file.getframerate() != 8000:
-            raise ValueError("Only 8kHz audio is supported.")
-
-        while True:
-            frame = wav_file.readframes(frame_size // 2)  # Divide by 2 because 16-bit audio = 2 bytes per sample
-            if not frame:
-                break
-            yield frame
 
 def read_audio_frames(file_path, frame_size=520):
     """

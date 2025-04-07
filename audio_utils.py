@@ -31,23 +31,6 @@ def read_audio_frames(file_path, frame_size=320):
         for i in range(0, len(raw_data), frame_size):
             yield raw_data[i:i + frame_size]
 
-# delete after testing
-def play_audio_stream_before():
-    pa = pyaudio.PyAudio()
-    stream = pa.open(format=pyaudio.paInt16, channels=1, rate=8000, output=True)
-    return stream
-
-def play_audio_stream_2(sample_rate=8000, channels=1, bit_depth=16):
-    import pyaudio
-    audio = pyaudio.PyAudio()
-    stream = audio.open(
-        format=pyaudio.paInt16 if bit_depth == 16 else pyaudio.paInt8,
-        channels=channels,
-        rate=sample_rate,
-        output=True
-    )
-    return stream
-
 def play_audio_stream(sample_rate=8000, channels=1, bit_depth=16):
     """
     Initializes an audio playback stream.

@@ -3,13 +3,17 @@ import socket
 import time
 import uuid
 from sip import build_invite, build_ack, build_ack_bye, generate_sdp_body
-from rtp import *  # Assuming you have this
-from config import * #specify rtp port in config.py
+from rtp import *  
+from config import *
 from rtcp import build_rtcp_sender_report
 
-# check current directory for debugging
-print("Current directory: ", os.getcwd()) # remove after testing
-file_name = "audio.mp3" # default file name for testing
+# check current directory
+print("Current directory: ", os.getcwd())
+
+# default file name for testing
+file_name = "audio.mp3"
+
+# loop until a valid file name is provided
 while True:
     file_name = input("Enter the audio file name (e.g. audio.mp3): ")
     try:
@@ -20,6 +24,7 @@ while True:
     except FileNotFoundError:
         print(f"File '{file_name}' not found in the current directory: {os.getcwd()}. Please try again.")
 
+# receiver IP and ports
 receiver_ip = '127.0.0.1'
 receiver_sip_port = SIP_PORT
 receiver_rtp_port = RTP_PORT
@@ -47,10 +52,6 @@ try:
         # Start RTP streaming
         rtp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         rtcp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Add RTCP socket
-
-        print("data: ", data.decode(errors="ignore")) # delete after testing
-        # to do: extract ssrc from the data
-
 
         seq = 0
         timestamp = 0
